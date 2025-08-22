@@ -1,98 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign Sync</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 24px; background:#0b1220; color:#e5e7eb; }
-    h1 { margin-bottom: 8px; }
-    .sub { opacity:.8; font-size:14px; margin-bottom:16px; }
-    video, canvas { width: 420px; max-width: 95vw; border: 2px solid #334155; border-radius: 12px; background:#000; }
-    #status { margin-top: 12px; font-size: 18px; font-weight: bold; }
-    .note { margin-top: 10px; font-size: 13px; opacity:.8 }
-    .warn { color:#fbbf24 }
-    .ok { color:#34d399 }
-    .btn { display:inline-block; margin-top:10px; padding:8px 12px; background:#374151; color:#fff; border-radius:8px; text-decoration:none }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDENT TABLE</title>
 </head>
+<h1>STUDENT MANAGEMENT SYSTEM</h1>
+<a href="https://scooplabs.in">click to open </a>
+<div class="form">
+<form>
+    <label>name</label>
+    <input type="text" placeholder="mom">
+    <br>
+    <label>age</label>
+    <input type="number" placeholder="20">
+    <br>
+    <label>GENDER</label>
+    <select>
+        <option>male</option>
+        <option>female</option>
+        
+       
+    </select>
+    <br>
+     <label>i agree</label>
+        <input type="checkbox">
+        <br>
+        <label>GENDER</label>
+        <input type="radio" value="male">
+        <label>male</label>
+        <input type="radio" value="female">
+        <label>female</label>
+         <br>
+        <input type="button" value="submit">
+        <div class="table">
+            <label>student table</label>
+            <br>
+        <table>
+            <tr>
+               <thead> student id </thead>
+               <thead> student name</thead>
+               <thead>roll number</thead>
+            </tr>
+            <tr>
+                <td>
+                    123
+                </td>
+                <td>
+                    rekha
+                </td>
+                <td>
+                    424545
+                </td>
+                <tr>
+                    <td>143</td>
+                    <td>mom</td>
+                    <td>154956</td>
+                </tr>
+            </tr>
+        </table>
+        
+
+        </div>
+        
+
+        
+         
+
+    </form>
+    </div>
 <body>
-  <h1>Sign Sync</h1>
-  <div class="sub">Show a gesture: 👋 Hello, 👍 Yes, 👎 No</div>
-  <video id="camera" autoplay playsinline muted></video>
-  <canvas id="output"></canvas>
-  <div id="status">Starting camera…</div>
-  <div class="note">Tip: Use HTTPS or http://localhost and allow Camera when prompted.</div>
-
-  <script>
-    const videoEl = document.getElementById('camera');
-    const canvasEl = document.getElementById('output');
-    const ctx = canvasEl.getContext('2d');
-    const statusEl = document.getElementById('status');
-    let redirecting = false;
-    function speak(t){ try{ speechSynthesis.speak(new SpeechSynthesisUtterance(t)); }catch(e){} }
-
-    function detectGesture(landmarks) {
-      if (!landmarks) return null;
-      const wrist = landmarks[0];
-      const indexTip = landmarks[8];
-      const thumbTip = landmarks[4];
-      // Simple heuristics (demo)
-      if (Math.abs(indexTip.x - wrist.x) > 0.22) return "Hello";
-      if (thumbTip.y < wrist.y - 0.05) return "Yes";
-      if (thumbTip.y > wrist.y + 0.15) return "No";
-      return null;
-    }
-
-    function onResults(results) {
-      canvasEl.width = results.image.width;
-      canvasEl.height = results.image.height;
-      ctx.save();
-      ctx.clearRect(0,0,canvasEl.width,canvasEl.height);
-      ctx.drawImage(results.image, 0, 0, canvasEl.width, canvasEl.height);
-      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-        const lm = results.multiHandLandmarks[0];
-        drawConnectors(ctx, lm, HAND_CONNECTIONS, { lineWidth:2 });
-        drawLandmarks(ctx, lm, { lineWidth:1 });
-        const g = detectGesture(lm);
-        if (g && !redirecting) {
-          redirecting = true;
-          statusEl.innerHTML = '<span class="ok">Detected:</span> ' + g + ' (moving to next page…)';
-          localStorage.setItem('gesture1', g);
-          speak(g);
-          setTimeout(() => window.location.href = 'page2.html', 1200);
-        }
-      } else {
-        statusEl.innerHTML = 'Show a gesture (👋 / 👍 / 👎)…';
-      }
-      ctx.restore();
-    }
-
-    async function start() {
-      if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
-        statusEl.innerHTML = '<span class="warn">Camera API not available.</span>';
-        return;
-      }
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        videoEl.srcObject = stream;
-        const hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
-        hands.setOptions({ maxNumHands:1, modelComplexity:0, minDetectionConfidence:0.7, minTrackingConfidence:0.7 });
-        hands.onResults(onResults);
-        const camera = new Camera(videoEl, { onFrame: async () => { await hands.send({ image: videoEl }); }, width: 420, height: 320 });
-        camera.start();
-        statusEl.textContent = 'Camera ready. Show a gesture…';
-      } catch (err) {
-        console.error(err);
-        statusEl.innerHTML = '<span class="warn">Camera denied.</span> Enable camera in site settings and reload.';
-      }
-    }
-    start();
-  </script>
+    
 </body>
 </html>
